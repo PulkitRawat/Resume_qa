@@ -193,3 +193,20 @@ def generate_answer(question: str, relevant_sentences:list[str])->str:
     answer = qa_tokenizer.convert_tokens_to_string(qa_tokenizer.convert_ids_to_tokens(inputs["input_ids"][0][start_index:end_index]))
 
     return answer.strip()
+
+def find_answer(question: str, text: str):
+    """
+    Final function to generate answer that will be given to the flask 
+
+    Parameters:
+        question (str): query asked by the user.
+        text (str): text given by the user in form of pdf or image.
+        
+    Returns:
+        str: generated answer.
+    """
+    
+    resume_chunks = preProcess_chunk_text(text) 
+    top_relevant_sentences = get_most_relevant_sentences(question, resume_chunks, 10)
+    answer = generate_answer(question, top_relevant_sentences)
+    return answer
