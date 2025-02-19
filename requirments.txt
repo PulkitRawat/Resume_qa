@@ -1,0 +1,10 @@
+flask
+werkzeug
+torch
+transformers
+spacy
+pdfplumber
+pytesseract
+Pillow
+opencv-python
+scikit-learn
