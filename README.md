@@ -58,6 +58,8 @@ PDF-Answering-AI/
 │── train/                    # Training data for embedding model
 │── validation/               # Validation data for embedding model
 │── test/                     # Test data for embedding model
+│── pdf_extractor.ipynb       # reference to change/test pdf extraction step
+│── qa.ipynb                  # reference to test/change the code in notebook
 ```
 
 This project provides an efficient, domain-specific AI assistant for answering questions from resumes. Ensure proper fine-tuning and model integration for optimal results.
