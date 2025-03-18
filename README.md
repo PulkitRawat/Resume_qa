@@ -12,30 +12,35 @@ Resume QnA is a Retrieval-Augmented Generation (RAG) model designed to extract r
 - Flask-based backend for deployment.
 
 ## Usage
-### 1. Setting Up the Environment
+### 1. Cloning the repo
+Clone the repo the change the directory to the app directory:
+```bash
+git clone https://github.com/PulkitRawat/Resume_qa.git
+cd Resume_qa
+```
+### 2. Setting Up the Environment
 Ensure you have Python installed and set up a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 ```
-
 Install the required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-### 2. Fine-Tuning the Embedding Model
+### 3. Fine-Tuning the Embedding Model
 Fine-tune the embedding model using `embedding_fine_tune.ipynb` and the provided dataset:
 - Place training, validation, and test data inside respective folders.
 - Run `embedding_fine_tune.ipynb` to train the model.
 - Save the fine-tuned model and update `model.py` accordingly.
 
-### 3. Fine-Tuning the QnA Model
+### 4. Fine-Tuning the QnA Model
 Fine-tune the QnA model using `model_fine_tune.ipynb` and the `qca` dataset:
 - Load the dataset into the notebook.
 - Train the model using the provided scripts.
 - Save the updated model and integrate it with the main pipeline
 
-### 4. Running the Web Application
+### 5. Running the Web Application
 Start the Flask server:
 ```bash
 python deployment.py
