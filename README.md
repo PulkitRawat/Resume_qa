@@ -47,7 +47,7 @@ python deployment.py
 ```
 Open `http://127.0.0.1:5000/` in your browser to interact with the application.
 
-.
+
 
 ## Structure
 ```
@@ -67,5 +67,6 @@ PDF-Answering-AI/
 │── qa.ipynb                  # reference to test/change the code in notebook
 ```
 
+## Conclusion
 This project provides an efficient, domain-specific AI assistant for answering questions from resumes. Ensure proper fine-tuning and model integration for optimal results.
 
