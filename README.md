@@ -13,7 +13,7 @@ Resume QnA is a Retrieval-Augmented Generation (RAG) model designed to extract r
 
 ## Usage
 ### 1. Cloning the repo
-Clone the repo the change the directory to the app directory:
+Clone the repo and the change the directory to the app directory:
 ```bash
 git clone https://github.com/PulkitRawat/Resume_qa.git
 cd Resume_qa
