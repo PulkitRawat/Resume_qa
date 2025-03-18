@@ -42,7 +42,7 @@ def upload_file():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
     file.save(file_path)
 
-    question = request.form.get('question', '')
+    question = request.form['question']
 
     try:
         pdf_text = extract_text(file_path)
