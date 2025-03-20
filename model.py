@@ -4,12 +4,17 @@ import pytesseract
 import re
 import spacy
 import torch
+import chromadb
+import uuid
+import numpy as np
 
 from PIL import Image
 from transformers import BertTokenizer, BertModel, BertForQuestionAnswering
 from sklearn.metrics.pairwise import cosine_similarity
 
 nlp = spacy.load("en_core_web_sm")
+chroma_client = chromadb.PersistentClient(path = "./chroma_db")
+
 
 def extract_text(file_path:str)->str:
     """
@@ -117,7 +122,7 @@ def extract_keywords(text: str):
         List[str]: a list of key phrases.
     """
     doc = nlp(text)
-    keywords = [token.text.lower() for token in doc if token.pos_ in ['NOUN', 'PROPN', 'ADJ']]
+    keywords = [token.text.lower() for token in doc if token.pos_ in ['NOUN', 'PROPN', 'ADJ','VERB']]
     return keywords
     
 def get_sentence_embedding(text:str):
@@ -136,31 +141,70 @@ def get_sentence_embedding(text:str):
     embedding = hidden_states.mean(dim = 1).squeeze()
     return embedding
 
-def get_most_relevant_sentences(question: str, resume_chunks: list[str], top_k = 7)->list[str]:
+def store_embeddings(text_chunks:list[str], collection):
     """
-    find the most relevant sentences in the resume for a given question
+    stores text chunks and their embeddings into chroma DB.
+
+    Parameters:
+        text_chunks(list[str]): list of extracted text chunks.
+        collection: place to store embedding
+    Returns:
+        None(Stores the embedding in chromaDB)
+    """
+    
+    
+    existing_texts = set()  
+
+    for chunk in text_chunks:
+        if chunk in existing_texts:
+            continue  
+        
+        embedding = get_sentence_embedding(chunk).tolist()
+        
+        collection.add(
+            ids=[str(uuid.uuid4())],  
+            embeddings=[embedding],  
+            metadatas=[{"text": chunk}]
+        )
+        
+        existing_texts.add(chunk) 
+
+    
+def get_most_relevant_sentences(question: str, collection, top_k = 7)->list[str]:
+    """
+    find the most relevant sentences in the resume for a given question using chromaDB and boost the relevance using keyword matching
 
     Parameters: 
         questions(str): the user's query.
-        resume_chunks(list): list of resume text chunks
+        collection: place to store embedding.
         top_k: maximum number of relvant sentences required(default 7)
     Returns:
         List[str]: the list of most relevant chunks
     """
     keywords = extract_keywords(question)
     question_embedding = get_sentence_embedding(question).numpy()
-    chunk_embeddings = [get_sentence_embedding(chunk).numpy() for chunk in resume_chunks]
+    results = collection.query(
+        query_embeddings = [question_embedding],
+        n_results = int(top_k*5)
+    )
 
-    chunk_embeddings = [embedding.flatten() for embedding in chunk_embeddings]
-    similarities = cosine_similarity([question_embedding], chunk_embeddings)
+    retrieved_chunks = results['metadatas'][0]
+    distances = results['distances'][0]
 
+    text_chunks = [chunk['text'] for chunk in retrieved_chunks]
     keyword_boost = []
-    for chunk, sim in zip(resume_chunks, similarities[0]):
+    for chunk,distance in zip(text_chunks, distances):
+    
         chunk_keywords = extract_keywords(chunk)
+
         match_count = len([chunk_keyword for chunk_keyword in chunk_keywords if chunk_keyword in keywords])
-        boosted_sim = sim + match_count*0.54
-        keyword_boost.append((boosted_sim, chunk))
+        
+        sim = 1/(1+distance)
+        boosted_score= sim + match_count*0.54
+        keyword_boost.append((boosted_score, chunk))
+        
     keyword_boost.sort(key = lambda x:x[0], reverse = True)
+    
     top_k_chunks = [chunk for _, chunk in keyword_boost[:top_k]]
 
     return top_k_chunks
@@ -207,6 +251,12 @@ def find_answer(question: str, text: str):
     """
     
     resume_chunks = preProcess_chunk_text(text) 
-    top_relevant_sentences = get_most_relevant_sentences(question, resume_chunks, 10)
+    existing_collections = chroma_client.list_collections()
+    if "resume_embeddings" in [col.name for col in existing_collections]:
+        chroma_client.delete_collection(name="resume_embeddings")
+    
+    collection = chroma_client.get_or_create_collection(name="resume_embeddings")
+    store_embeddings(resume_chunks, collection)
+    top_relevant_sentences = get_most_relevant_sentences(question, collection, 10)
     answer = generate_answer(question, top_relevant_sentences)
     return answer
