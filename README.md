@@ -1,7 +1,7 @@
 # Resume QnA
 
 ## Overview
-Resume QnA is a Retrieval-Augmented Generation (RAG) model designed to extract relevant information from resumes uploaded as PDFs or images. The system utilizes fine-tuned BERT transformer-based embeddings to find the closest sentences to a given question and generate a concise response. Fine-tuning has been performed on a resume-specific dataset to enhance answer accuracy. The application is deployed using Flask, providing a simple web interface for users to upload documents and ask questions.
+Resume QnA is a Retrieval-Augmented Generation (RAG) model designed to extract relevant information from resumes uploaded as PDFs or images. The system utilizes fine-tuned BERT transformer-based embeddings to generate embedding for both question and extracted text, the extracted text embedding are saved in chromaDB which help in finding the closest sentences to a given question and generate a concise response. Fine-tuning has been performed on a resume-specific dataset to enhance answer accuracy. The application is deployed using Flask, providing a simple web interface for users to upload documents and ask questions.
 
 ## Features
 - Supports both scanned and unscanned PDFs.

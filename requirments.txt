@@ -8,3 +8,4 @@ pytesseract
 Pillow
 opencv-python
 scikit-learn
+chromaDB
